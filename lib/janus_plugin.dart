@@ -131,6 +131,10 @@ class JanusPlugin {
           (_transport as WebSocketJanusTransport).stream.listen((event) {
         _streamController!.add(parse(event));
       });
+    } else if (_transport is MqttJanusTransport) {
+      _wsStreamSubscription = (_transport as MqttJanusTransport).stream.listen((event) {
+        _streamController!.add(parse(event));
+      });
     }
   }
 
@@ -303,6 +307,9 @@ class JanusPlugin {
           WebSocketJanusTransport ws = (_transport as WebSocketJanusTransport);
           response = (await ws.send(request, handleId: handleId))
               as Map<String, dynamic>;
+        } else if (_transport is MqttJanusTransport) {
+          final mqtt = _transport as MqttJanusTransport;
+          response = (await mqtt.send(request, handleId: handleId)) as Map<String, dynamic>;
         }
         _streamController!.sink.add(response);
       }
@@ -489,6 +496,12 @@ class JanusPlugin {
           return;
         }
         response = await ws.send(request, handleId: handleId);
+      } else if (_transport is MqttJanusTransport) {
+        final mqtt = _transport as MqttJanusTransport;
+        if (!mqtt.isConnected) {
+          return;
+        }
+        response = await mqtt.send(request, handleId: handleId);
       }
       return response;
     } catch (e) {
