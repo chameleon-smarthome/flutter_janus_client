@@ -140,10 +140,8 @@ class MqttJanusTransport extends JanusTransport {
 
   late final MqttClient _client = () {
     final uri = Uri.parse(this.url!);
-    final url = uri.replace(port: 0, userInfo: '').toString();
-    final client = (kIsWeb
-        ? MqttBrowserClient(url, clientIdentifier ?? getUuid().v4())
-        : MqttServerClient(url, clientIdentifier ?? getUuid().v4()))
+    final url = kIsWeb ? uri.replace(userInfo: '', port: 0).toString() : uri.host;
+    final client = MqttPlatformClient(url, clientIdentifier ?? getUuid().v4())
       ..websocketProtocols = MqttClientConstants.protocolsSingleDefault
       ..port = uri.port > 0 ? uri.port : null
       ..autoReconnect = true
