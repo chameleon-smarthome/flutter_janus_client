@@ -104,18 +104,19 @@ class MqttJanusTransport extends JanusTransport {
     required String url,
     required this.publishTopic,
     required this.subscribeTopic,
-    this.clientIdentifier,
+    String? clientIdentifier,
     String? username,
     String? password,
   })  : assert(publishTopic.isNotEmpty, 'requestTopic is empty'),
         assert(subscribeTopic.isNotEmpty, 'responseTopic is empty'),
         username = Uri.parse(url).userInfo.isEmpty ? username : Uri.parse(url).userInfo.split(':').firstOrNull,
         password = !Uri.parse(url).userInfo.contains(':') ? password : Uri.parse(url).userInfo.split(':').lastOrNull,
+        _clientIdentifier = clientIdentifier ?? getUuid().v4(),
         super(url: url);
 
-  final String publishTopic, subscribeTopic;
+  final String _clientIdentifier, publishTopic, subscribeTopic;
 
-  final String? clientIdentifier, username, password;
+  final String? username, password;
 
   bool get isConnected => _client.connectionStatus?.state == MqttConnectionState.connected;
 
@@ -141,12 +142,15 @@ class MqttJanusTransport extends JanusTransport {
   late final MqttClient _client = () {
     final uri = Uri.parse(this.url!);
     final url = kIsWeb ? uri.replace(userInfo: '', port: 0).toString() : uri.host;
-    final client = MqttPlatformClient(url, clientIdentifier ?? getUuid().v4())
-      ..websocketProtocols = MqttClientConstants.protocolsSingleDefault
-      ..port = uri.port > 0 ? uri.port : null
+    final client = MqttPlatformClient(url, _clientIdentifier)
+      ..port = uri.hasPort ? uri.port : 1883
+      ..setProtocolV311()
       ..autoReconnect = true
+      ..keepAlivePeriod = 4000
+      ..connectionMessage = MqttConnectMessage().withClientIdentifier(_clientIdentifier).startClean()
       ..onConnected = (() => print('Mqtt Server Connected'))
-      ..onDisconnected = () => print('Mqtt Server Disconected');
+      ..onDisconnected = (() => print('Mqtt Server Disconected'))
+      ..websocketProtocols = MqttClientConstants.protocolsSingleDefault;
     return client;
   }();
 
