@@ -141,7 +141,7 @@ class MqttJanusTransport extends JanusTransport {
 
   late final MqttClient _client = () {
     final uri = Uri.parse(this.url!);
-    final url = kIsWeb ? uri.replace(userInfo: '', port: 0).toString() : uri.host;
+    final url = uri.scheme.startsWith('ws') ? uri.replace(userInfo: '', port: 0).toString() : uri.host;
     final client = MqttPlatformClient(url, _clientIdentifier)
       ..port = uri.hasPort ? uri.port : 1883
       ..setProtocolV311()
