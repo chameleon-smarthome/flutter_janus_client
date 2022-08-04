@@ -104,19 +104,15 @@ class MqttJanusTransport extends JanusTransport {
     required String url,
     required this.publishTopic,
     required this.subscribeTopic,
-    String? clientIdentifier,
-    String? username,
-    String? password,
+    this.clientIdentifier,
   })  : assert(publishTopic.isNotEmpty, 'requestTopic is empty'),
         assert(subscribeTopic.isNotEmpty, 'responseTopic is empty'),
-        username = Uri.parse(url).userInfo.isEmpty ? username : Uri.parse(url).userInfo.split(':').firstOrNull,
-        password = !Uri.parse(url).userInfo.contains(':') ? password : Uri.parse(url).userInfo.split(':').lastOrNull,
-        _clientIdentifier = clientIdentifier ?? getUuid().v4(),
+        assert(Uri.tryParse(url) == null, 'uri is invalid'),
         super(url: url);
 
-  final String _clientIdentifier, publishTopic, subscribeTopic;
+  final String publishTopic, subscribeTopic;
 
-  final String? username, password;
+  final String? clientIdentifier;
 
   bool get isConnected => _client.connectionStatus?.state == MqttConnectionState.connected;
 
@@ -141,13 +137,14 @@ class MqttJanusTransport extends JanusTransport {
 
   late final MqttClient _client = () {
     final uri = Uri.parse(this.url!);
-    final url = uri.scheme.startsWith('ws') ? uri.replace(userInfo: '', port: 0).toString() : uri.host;
-    final client = MqttPlatformClient(url, _clientIdentifier)
+    final url = uri.scheme.startsWith('ws') ? uri.scheme + uri.host : uri.host;
+    final clientId = clientIdentifier ?? (uri.userInfo.isEmpty ? getUuid().v4() : uri.userInfo.split(':').first);
+    final client = MqttPlatformClient(url, clientId)
       ..port = uri.hasPort ? uri.port : 1883
       ..setProtocolV311()
       ..autoReconnect = true
       ..keepAlivePeriod = 4000
-      ..connectionMessage = MqttConnectMessage().withClientIdentifier(_clientIdentifier).startClean()
+      ..connectionMessage = MqttConnectMessage().withClientIdentifier(clientId).startClean()
       ..onConnected = (() => print('Mqtt Server Connected'))
       ..onDisconnected = (() => print('Mqtt Server Disconected'))
       ..websocketProtocols = MqttClientConstants.protocolsSingleDefault;
@@ -156,6 +153,9 @@ class MqttJanusTransport extends JanusTransport {
 
   Future<void> connect() async {
     try {
+      final uri = Uri.parse(this.url!);
+      final username = uri.userInfo.isEmpty ? null : uri.userInfo.split(':').first;
+      final password = !uri.userInfo.contains(':') ? null : uri.userInfo.split(':').last;
       final status = await _client.connect(username, password);
       if (status?.state != MqttConnectionState.connected) {
         throw Exception("The state is not connected: ${status?.state.name}:${status?.returnCode?.name}");
