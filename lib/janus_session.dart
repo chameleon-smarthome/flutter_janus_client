@@ -61,7 +61,7 @@ class JanusSession {
     }
   }
 
-  Future<T> attach<T extends JanusPlugin>() async {
+  Future<T> attach<T extends JanusPlugin>({String? package}) async {
     JanusPlugin plugin;
     int? handleId;
     String transaction = getUuid().v4();
@@ -84,6 +84,8 @@ class JanusSession {
       plugin = JanusEchoTestPlugin(transport: _transport, context: _context, handleId: handleId, session: this);
     } else if (T == JanusSipPlugin) {
       plugin = JanusSipPlugin(transport: _transport, context: _context, handleId: handleId, session: this);
+    } else if (package != null) {
+      plugin = JanusPlugin(transport: _transport!, context: _context, handleId: handleId, session: this, plugin: package);
     } else {
       throw UnimplementedError('''This Plugin is not defined kindly refer to Janus Server Docs
       make sure you specify the type of plugin you want to attach like session.attach<JanusVideoRoomPlugin>();
