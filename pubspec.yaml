@@ -21,7 +21,6 @@ dependencies:
   uuid: ^3.0.6
   logging: ^1.0.2
   collection: ^1.16.0
-  dartdoc: ^5.1.2
 
 
 
