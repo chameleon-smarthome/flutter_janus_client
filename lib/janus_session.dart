@@ -46,8 +46,7 @@ class JanusSession {
         if (!mqtt.isConnected) {
           await mqtt.connect();
         }
-        mqtt.sink.add(request);
-        response = parse(await mqtt.stream.firstWhere((element) => (parse(element)['transaction'] == transaction)));
+        response = await mqtt.send(request);
         if (response!.containsKey('janus') && response.containsKey('data')) {
           _sessionId = response['data']['id'] as int?;
           mqtt.sessionId = sessionId;
@@ -122,9 +121,8 @@ class JanusSession {
       if (!mqtt.isConnected) {
         await mqtt.connect();
       }
-      mqtt.sink.add(request);
-      response = parse(await mqtt.stream.firstWhere((element) => (parse(element)['transaction'] == transaction)));
-      if (response!.containsKey('janus') && response.containsKey('data')) {
+      response = await mqtt.send(request);
+       if (response!.containsKey('janus') && response.containsKey('data')) {
         handleId = response['data']['id'] as int?;
         _context._logger.fine(response);
       }
@@ -178,15 +176,14 @@ class JanusSession {
               _context._logger.fine("not connected trying to establish connection to mqtt");
               await mqtt.connect();
             }
-            mqtt.sink.add({
+            _context._logger.fine("keepalive request send to mqtt");
+            response = await mqtt.send({
               "janus": "keepalive",
               "session_id": sessionId,
               "transaction": transaction,
               ..._context._apiMap,
               ..._context._tokenMap
             });
-            _context._logger.fine("keepalive request sent to mqtt");
-            response = parse(await mqtt.stream.firstWhere((element) => (parse(element)['transaction'] == transaction)));
             _context._logger.fine(response);
           }
         } catch (e) {

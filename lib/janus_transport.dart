@@ -171,11 +171,14 @@ class MqttJanusTransport extends JanusTransport {
 
   Future<dynamic> send(Map<String, dynamic> data, {int? handleId}) async {
     final String? transaction = data['transaction'];
+
     if (transaction?.isEmpty ?? true) {
       throw "transaction key missing in body";
     }
 
-    data['session_id'] = sessionId;
+    if (sessionId != null) {
+      data['session_id'] = sessionId;
+    }
 
     if (handleId != null) {
       data['handle_id'] = handleId;
@@ -183,7 +186,12 @@ class MqttJanusTransport extends JanusTransport {
 
     sink.add(data);
 
-    final result = await stream.map(parse).firstWhere((event) => event['transaction'] == transaction, orElse: () {});
+    final result = await stream
+        .map(parse)
+        .where((event) => event['transaction'] == transaction)
+        .timeout(Duration(seconds: 5))
+        .first;
+
     return result;
   }
 
