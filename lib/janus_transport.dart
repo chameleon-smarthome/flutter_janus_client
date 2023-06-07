@@ -116,7 +116,7 @@ class MqttJanusTransport extends JanusTransport {
 
   bool get isConnected => _client.connectionStatus?.state == MqttConnectionState.connected;
 
-  late StreamSubscription _subs;
+  StreamSubscription? _subs;
   late final StreamController<Map<String, dynamic>> sink = () {
     final controller = StreamController<Map<String, dynamic>>();
     _subs = (controller.stream.where((event) => isConnected)).listen((event) {
@@ -186,7 +186,7 @@ class MqttJanusTransport extends JanusTransport {
 
     sink.add(data);
 
-    final result = await stream
+    final result = await stream //
         .map(parse)
         .where((event) => event['transaction'] == transaction)
         .timeout(Duration(seconds: 5))
@@ -196,7 +196,7 @@ class MqttJanusTransport extends JanusTransport {
   }
 
   void dispose() async {
-    await _subs.cancel();
+    await _subs?.cancel();
     await sink.close();
     _client.disconnect();
   }
