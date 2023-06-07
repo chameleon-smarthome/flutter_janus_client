@@ -189,7 +189,7 @@ class MqttJanusTransport extends JanusTransport {
     final result = await stream //
         .map(parse)
         .where((event) => event['transaction'] == transaction)
-        .timeout(Duration(seconds: 5))
+        .timeout(Duration(seconds: 20))
         .first;
 
     return result;
