@@ -11,12 +11,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  characters: ^1.2.0
+  characters: 1.3.0
 
 
   janus_client:
     # When depending on this package from a real application you should use:
-    #   janus_client: ^x.y.z
+    #   janus_client: x.y.z
     # See https://dart.dev/tools/pub/dependencies#version-constraints
     # The example app is bundled with the plugin so we use a path dependency on
     # the parent directory to use the current plugin's version. 
@@ -24,8 +24,8 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.4
-  prompt_dialog: ^1.0.9
+  cupertino_icons: 1.0.8
+  prompt_dialog: 1.0.17
 
 dev_dependencies:
   flutter_test:
