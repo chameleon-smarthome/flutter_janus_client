@@ -587,10 +587,10 @@ class JanusPlugin {
   /// This method is used to create webrtc offer, sets local description on internal PeerConnection object
   /// It supports both style of offer creation that is plan-b and unified.
   Future<RTCSessionDescription> createOffer(
-      {bool audioRecv: true,
-      bool videoRecv: true,
-      bool audioSend: true,
-      bool videoSend: true}) async {
+      {bool audioRecv = true,
+      bool videoRecv = true,
+      bool audioSend = true,
+      bool videoSend = true}) async {
     dynamic offerOptions;
     if (_context._isUnifiedPlan && !_context._usePlanB) {
       await _prepareTranscievers(
@@ -612,10 +612,10 @@ class JanusPlugin {
   /// This method is used to create webrtc answer, sets local description on internal PeerConnection object
   /// It supports both style of answer creation that is plan-b and unified.
   Future<RTCSessionDescription> createAnswer(
-      {bool audioRecv: true,
-      bool videoRecv: true,
-      bool audioSend: true,
-      bool videoSend: true}) async {
+      {bool audioRecv = true,
+      bool videoRecv = true,
+      bool audioSend = true,
+      bool videoSend = true}) async {
     dynamic offerOptions;
     if (_context._isUnifiedPlan && !_context._usePlanB) {
       await _prepareTranscievers(
@@ -644,10 +644,10 @@ class JanusPlugin {
   }
 
   Future<RTCSessionDescription?> createNullableAnswer(
-      {bool audioRecv: true,
-      bool videoRecv: true,
-      bool audioSend: true,
-      bool videoSend: true}) async {
+      {bool audioRecv = true,
+      bool videoRecv = true,
+      bool audioSend = true,
+      bool videoSend = true}) async {
     dynamic offerOptions;
     if (_context._isUnifiedPlan && !_context._usePlanB) {
       await _prepareTranscievers(
@@ -698,10 +698,10 @@ class JanusPlugin {
   }
 
   Future _prepareTranscievers(
-      {bool audioRecv: false,
-      bool videoRecv: false,
-      bool audioSend: true,
-      bool videoSend: true}) async {
+      {bool audioRecv = false,
+      bool videoRecv = false,
+      bool audioSend = true,
+      bool videoSend = true}) async {
     print('using transrecievers in prepare transrecievers');
     RTCRtpTransceiver? audioTransceiver;
     RTCRtpTransceiver? videoTransceiver;
